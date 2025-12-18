@@ -1,32 +1,54 @@
-# app.py
-import gradio as gr
+import streamlit as st
 
-# Pump Power Calculator Function
-# Power (kW) = (Flow rate * Density * 9.81 * Head) / Efficiency
+st.set_page_config(page_title="Pump Power Calculator", layout="centered")
 
-def pump_power(flow_rate, density, head, efficiency):
-    try:
-        g = 9.81
-        efficiency = efficiency / 100  # convert percentage to decimal
-        power_watts = (flow_rate * density * g * head) / efficiency
-        power_kw = power_watts / 1000
-        return f"Pump Power: {power_kw:.3f} kW"
-    except Exception as e:
-        return f"Error: {str(e)}"
+st.title("💧 Pump Power Calculator")
+st.write("Calculate the required pump power based on flow rate, head, efficiency, and fluid density.")
 
-with gr.Blocks() as demo:
-    gr.Markdown("## 🧮 Pump Power Calculator")
-    gr.Markdown("Enter the pump parameters to compute hydraulic power.")
+st.divider()
 
-    flow = gr.Number(label="Flow Rate (m³/s)")
-    density = gr.Number(label="Fluid Density (kg/m³)", value=1000)
-    head = gr.Number(label="Pump Head (m)")
-    efficiency = gr.Number(label="Pump Efficiency (%)", value=70)
+# Input fields
+Q = st.number_input(
+    "Flow Rate, Q (m³/s)",
+    min_value=0.0,
+    step=0.001,
+    help="Volume flow rate of the fluid"
+)
 
-    output = gr.Textbox(label="Result")
+H = st.number_input(
+    "Pump Head, H (m)",
+    min_value=0.0,
+    step=0.1,
+    help="Total head developed by the pump"
+)
 
-    btn = gr.Button("Calculate Pump Power")
-    btn.click(pump_power, inputs=[flow, density, head, efficiency], outputs=output)
+eta = st.number_input(
+    "Pump Efficiency, η (0–1)",
+    min_value=0.01,
+    max_value=1.0,
+    value=0.7,
+    step=0.01,
+    help="Overall pump efficiency"
+)
 
-if __name__ == "__main__":
-    demo.launch()
+rho = st.number_input(
+    "Fluid Density, ρ (kg/m³)",
+    min_value=1.0,
+    value=1000.0,
+    step=10.0,
+    help="Density of the pumped fluid (water ≈ 1000 kg/m³)"
+)
+
+st.divider()
+
+# Calculation
+if st.button("🔢 Calculate Pump Power"):
+    g = 9.81  # gravitational acceleration (m/s²)
+    
+    power_kw = (rho * g * Q * H) / (eta * 1000)
+
+    st.success(f"### Required Pump Power = **{power_kw:.3f} kW**")
+
+    st.caption(
+        "Formula used:  P = (ρ × g × Q × H) / η"
+    )
