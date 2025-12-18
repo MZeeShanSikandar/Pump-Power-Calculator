@@ -12,7 +12,7 @@ st.markdown(
     """
     <h1 style='text-align: center;'>⚙️ Advanced Pump Power Calculator</h1>
     <p style='text-align: center; font-size: 16px;'>
-    Engineering tool for pump & motor power estimation
+    Engineering tool for pump and motor power estimation
     </p>
     """,
     unsafe_allow_html=True
@@ -21,14 +21,14 @@ st.markdown(
 st.divider()
 
 # ---------------- SIDEBAR ----------------
-st.sidebar.header("⚙️ Calculation Options")
+st.sidebar.header("⚙️ Options")
 
 include_motor = st.sidebar.checkbox("Include Motor Power", value=True)
 include_losses = st.sidebar.checkbox("Include Head Losses", value=True)
-efficiency_input = st.sidebar.radio("Efficiency Input Format", ["Decimal", "Percentage"])
+efficiency_format = st.sidebar.radio("Efficiency Format", ["Decimal", "Percentage"])
 
 st.sidebar.divider()
-st.sidebar.info("Designed for Mechanical Engineering Applications")
+st.sidebar.info("Mechanical Engineering Utility")
 
 # ---------------- INPUT SECTION ----------------
 st.subheader("📥 Input Parameters")
@@ -37,36 +37,39 @@ col1, col2 = st.columns(2)
 
 with col1:
     Q = st.number_input(
-        "Flow Rate, Q",
+        "Flow Rate (Q)",
         min_value=0.0,
-        step=0.001,
-        help="Flow rate of fluid"
+        step=0.001
     )
-    Q_unit = st.selectbox("Q Units", ["m³/s", "m³/hr", "L/s"])
+
+    Q_unit = st.selectbox(
+        "Flow Rate Unit",
+        ["m³/s", "m³/hr", "L/s"]
+    )
 
     rho = st.number_input(
-        "Fluid Density, ρ (kg/m³)",
+        "Fluid Density ρ (kg/m³)",
         value=1000.0,
         step=10.0
     )
 
 with col2:
     H = st.number_input(
-        "Static Head, H (m)",
+        "Static Head H (m)",
         min_value=0.0,
         step=0.1
     )
 
     if include_losses:
-        loss = st.number_input(
+        losses = st.number_input(
             "Head Losses (m)",
             min_value=0.0,
             step=0.1
         )
     else:
-        loss = 0.0
+        losses = 0.0
 
-    if efficiency_input == "Percentage":
+    if efficiency_format == "Percentage":
         eta = st.number_input(
             "Pump Efficiency (%)",
             min_value=1.0,
@@ -83,13 +86,13 @@ with col2:
 
 st.divider()
 
-# ---------------- CONVERSIONS ----------------
+# ---------------- UNIT CONVERSION ----------------
 if Q_unit == "m³/hr":
     Q = Q / 3600
 elif Q_unit == "L/s":
     Q = Q / 1000
 
-H_total = H + loss
+H_total = H + losses
 g = 9.81
 
 # ---------------- CALCULATION ----------------
@@ -104,28 +107,26 @@ if st.button("🧮 Calculate Power", use_container_width=True):
     st.metric("Pump Shaft Power", f"{pump_power:.3f} kW")
 
     if include_motor:
-        motor_eff = st.slider("Motor Efficiency (%)", 70, 98, 90)
+        motor_eff = st.slider(
+            "Motor Efficiency (%)",
+            min_value=70,
+            max_value=98,
+            value=90
+        )
         motor_power = pump_power / (motor_eff / 100)
-
         st.metric("Required Motor Power", f"{motor_power:.3f} kW")
 
     st.success("Calculation completed successfully ✔️")
 
     st.caption(
-        "Formula Used: P = (ρ × g × Q × H) / η"
+        "Formula: P = (ρ × g × Q × H) / η"
     )
 
 # ---------------- FOOTER ----------------
 st.divider()
 st.markdown(
     "<p style='text-align: center; font-size: 13px;'>"
-    "Developed for Mechanical Engineering Applications • Pump & Fluid Machinery"
+    "Pump & Fluid Machinery • Mechanical Engineering Tool"
     "</p>",
     unsafe_allow_html=True
 )
-
-    st.success(f"### Required Pump Power = **{power_kw:.3f} kW**")
-
-    st.caption(
-        "Formula used:  P = (ρ × g × Q × H) / η"
-    )
